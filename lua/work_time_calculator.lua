@@ -1,5 +1,5 @@
 -- main module file
-local module = require("plugin_name.module")
+local table_generator = require("work_time_calculator.table_generator")
 
 ---@class Config
 ---@field opt string Your config option
@@ -20,8 +20,10 @@ M.setup = function(args)
   M.config = vim.tbl_deep_extend("force", M.config, args or {})
 end
 
-M.hello = function()
-  return module.my_first_function(M.config.opt)
+-- TODO: refresh open buffer if it's the hour list buffer
+-- TODO: actually trigger the time calculator
+M.calculate_time = function()
+  table_generator.generate_hours_table()
 end
 
 return M
