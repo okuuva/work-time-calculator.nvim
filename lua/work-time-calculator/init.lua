@@ -1,5 +1,5 @@
 -- main module file
-local table_generator = require("work_time_calculator.table_generator")
+local table_generator = require("work-time-calculator.table-generator")
 
 ---@class Config
 ---@field opt string Your config option
