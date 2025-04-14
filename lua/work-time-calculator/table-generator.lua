@@ -1,10 +1,6 @@
 ---@class TableGenerator
 local M = {}
 
--- FIXME: fetch these paths with obsidian.nvim
-local daily_notes_dir = vim.fn.expand("~/Notes/notes/dailies")
-local output_file = vim.fn.expand("~/Notes/notes/1740225022-hours.md")
-
 local function extract_times_from_file(filepath)
   local lines = {}
   local f = io.open(filepath, "r")
@@ -101,8 +97,9 @@ local function read_existing_header(filepath)
   end
 end
 
-function M.generate_hours_table()
-  local daily_notes = vim.fn.glob(daily_notes_dir .. "/*.md", 1, 1)
+---@param config WorkTimeCalculatorConfig
+function M.generate_hours_table(config)
+  local daily_notes = vim.fn.glob(config.daily_notes_dir .. "/*.md", 1, 1)
   local data = {}
 
   for _, filepath in ipairs(daily_notes) do
@@ -119,7 +116,7 @@ function M.generate_hours_table()
   end
 
   local markdown_table = generate_markdown_table(data)
-  local existing_header = read_existing_header(output_file)
+  local existing_header = read_existing_header(config.output_file)
   local output_content = ""
 
   if existing_header then
@@ -128,15 +125,15 @@ function M.generate_hours_table()
 
   output_content = output_content .. "\n# Hours\n\n" .. markdown_table
 
-  local f = io.open(output_file, "w")
+  local f = io.open(config.output_file, "w")
   if not f then
-    vim.notify("Could not open output file: " .. output_file, vim.log.levels.ERROR)
+    vim.notify("Could not open output file: " .. config.output_file, vim.log.levels.ERROR)
     return
   end
   f:write(output_content)
   f:close()
 
-  vim.notify("Hours table generated at " .. output_file, vim.log.levels.INFO)
+  vim.notify("Hours table generated at " .. config.output_file, vim.log.levels.INFO)
 end
 
 return M

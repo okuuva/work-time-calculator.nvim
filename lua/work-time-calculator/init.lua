@@ -1,19 +1,22 @@
 -- main module file
 local table_generator = require("work-time-calculator.table-generator")
 
----@class Config
----@field opt string Your config option
+---@class WorkTimeCalculatorConfig
+---@field daily_notes_dir string
+---@field output_file string
 local config = {
-  opt = "Hello!",
+  -- FIXME: fetch these paths with obsidian.nvim
+  daily_notes_dir = vim.fn.expand("~/Notes/notes/dailies"),
+  output_file = vim.fn.expand("~/Notes/notes/1740225022-hours.md"),
 }
 
 ---@class MyModule
 local M = {}
 
----@type Config
+---@type WorkTimeCalculatorConfig
 M.config = config
 
----@param args Config?
+---@param args WorkTimeCalculatorConfig?
 -- you can define your setup function here. Usually configurations can be merged, accepting outside params and
 -- you can also put some validation here for those.
 M.setup = function(args)
@@ -23,7 +26,7 @@ end
 -- TODO: refresh open buffer if it's the hour list buffer
 -- TODO: actually trigger the time calculator
 M.calculate_time = function()
-  table_generator.generate_hours_table()
+  table_generator.generate_hours_table(M.config)
 end
 
 return M
