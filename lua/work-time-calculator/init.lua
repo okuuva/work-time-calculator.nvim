@@ -23,10 +23,10 @@ M.setup = function(args)
   M.config = vim.tbl_deep_extend("force", M.config, args or {})
 end
 
--- TODO: refresh open buffer if it's the hour list buffer
 -- TODO: actually trigger the time calculator
 M.calculate_time = function()
   table_generator.generate_hours_table(M.config)
+  vim.cmd("edit! " .. M.config.output_file)
 end
 
 return M
