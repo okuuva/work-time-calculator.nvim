@@ -1,5 +1,6 @@
 -- main module file
 local table_generator = require("work-time-calculator.table-generator")
+local time_calculator = require("time-calculator")
 
 ---@class WorkTimeCalculatorConfig
 ---@field daily_notes_dir string
@@ -23,10 +24,10 @@ M.setup = function(args)
   M.config = vim.tbl_deep_extend("force", M.config, args or {})
 end
 
--- TODO: actually trigger the time calculator
 M.calculate_time = function()
   table_generator.generate_hours_table(M.config)
   vim.cmd("edit! " .. M.config.output_file)
+  time_calculator.calculate_time()
 end
 
 return M
