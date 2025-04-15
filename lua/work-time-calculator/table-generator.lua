@@ -39,17 +39,36 @@ local function extract_times_from_file(filepath)
   return times, nil
 end
 
+local function get_weekday_from_date(date_str)
+  -- Assuming date format is YYYY-MM-DD
+  local year, month, day = date_str:match("(%d+)-(%d+)-(%d+)")
+  if not year or not month or not day then
+    return ""
+  end
+
+  -- Convert to numbers
+  year = tonumber(year)
+  month = tonumber(month)
+  day = tonumber(day)
+
+  -- Create a timestamp for the date
+  local timestamp = os.time({year = year, month = month, day = day})
+  local weekday = os.date("%a", timestamp) -- Returns short weekday name (Mon, Tue, etc.)
+  return weekday
+end
+
 local function generate_markdown_table(data)
-  local table_header = "| Date       | In    | Out   | In    | Out   | In    | Out   | Total |\n"
-  table_header = table_header .. "| ---------- | ----- | ----- | ----- | ----- | ----- | ----- | ----- |\n"
+  local table_header = "| Date (Day)  | In    | Out   | In    | Out   | In    | Out   | Total |\n"
+  table_header = table_header .. "| ----------- | ----- | ----- | ----- | ----- | ----- | ----- | ----- |\n"
 
   local table_rows = {}
-  local grand_total_row = "| GrandTotal |"
+  local grand_total_row = "| GrandTotal  |"
 
   for _, entry in ipairs(data) do
     local date = entry.date
+    local weekday = get_weekday_from_date(date)
     local times = entry.times
-    local row = string.format("| %s |", date)
+    local row = string.format("| %s (%s) |", date, weekday)
     local total_time = "00:00" -- Placeholder, you'd calculate this
 
     -- Add time entries, only if they exist
