@@ -3,12 +3,14 @@ local table_generator = require("work-time-calculator.table-generator")
 local time_calculator = require("time-calculator")
 
 ---@class WorkTimeCalculatorConfig
----@field daily_notes_dir string
----@field output_file string
+---@field opt string Your config option
+---@field output_file string Path to the output file
+---@field workday_length string Expected workday length in HH:MM format
 local config = {
   -- FIXME: fetch these paths with obsidian.nvim
   daily_notes_dir = vim.fn.expand("~/Notes/notes/dailies"),
   output_file = vim.fn.expand("~/Notes/notes/1740225022-hours.md"),
+  workday_length = "06:00",
 }
 
 ---@class MyModule
@@ -28,6 +30,10 @@ M.calculate_time = function()
   table_generator.generate_hours_table(M.config)
   vim.cmd("edit! " .. M.config.output_file)
   time_calculator.calculate_time()
+  table_generator.add_goal_column(M.config)
+
+  -- Reload the buffer
+  vim.cmd("e! " .. M.config.output_file)
 end
 
 return M
