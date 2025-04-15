@@ -60,14 +60,14 @@ local function generate_markdown_table(data)
     -- Pad with empty cells if needed
     local num_time_pairs = math.floor(#times / 2)
     for i = 1, 3 - num_time_pairs do
-      row = row .. " - | - |"
+      row = row .. "   -   |   -   |"
     end
 
     row = row .. string.format(" %s |\n", total_time)
     table.insert(table_rows, row)
   end
 
-  grand_total_row = grand_total_row .. " - | - | - | - | - | - | 00:00 |\n"
+  grand_total_row = grand_total_row .. "   -   |   -   |   -   |   -   |   -   |   -   | 00:00 |\n"
 
   return table_header .. table.concat(table_rows, "") .. grand_total_row
 end
