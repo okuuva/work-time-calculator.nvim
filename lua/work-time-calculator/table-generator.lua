@@ -58,9 +58,10 @@ local function get_weekday_from_date(date_str)
 end
 
 local function generate_markdown_table(data, workday_length)
-  local table_header = "| Date       | Day   | In    | Out   | In    | Out   | In    | Out   | Total | Goal  |\n"
+  local table_header =
+    "| Date       | Day   | In    | Out   | In    | Out   | In    | Out   | Total | Goal  | Diff  |\n"
   table_header = table_header
-    .. "| ---------- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- |\n"
+    .. "| ---------- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | -----:|\n"
 
   local table_rows = {}
   local grand_total_row = "| GrandTotal |       |"
@@ -69,7 +70,7 @@ local function generate_markdown_table(data, workday_length)
     local date = entry.date
     local weekday = get_weekday_from_date(date)
     local times = entry.times
-    local row = string.format("| %s |  %s  |", date, weekday)
+    local row = string.format("| %s | %s   |", date, weekday)
 
     -- Add time entries, only if they exist
     for i = 1, math.floor(#times / 2) do -- Iterate up to the number of pairs
@@ -82,16 +83,16 @@ local function generate_markdown_table(data, workday_length)
       row = row .. "       |       |"
     end
 
-    -- Add total time and goal
+    -- Add goal and diff
     local goal = "00:00"
     if weekday ~= "Sat" and weekday ~= "Sun" then
       goal = workday_length
     end
-    row = row .. string.format("       | %s |\n", goal)
+    row = row .. string.format("       | %s |       |\n", goal)
     table.insert(table_rows, row)
   end
 
-  grand_total_row = grand_total_row .. "       |       |       |       |       |       |       |       |\n"
+  grand_total_row = grand_total_row .. "       |       |       |       |       |       |       |       |       |\n"
 
   return table_header .. table.concat(table_rows, "") .. grand_total_row
 end
