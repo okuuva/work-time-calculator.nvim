@@ -58,18 +58,17 @@ local function get_weekday_from_date(date_str)
 end
 
 local function generate_markdown_table(data)
-  local table_header = "| Date (Day)  | In    | Out   | In    | Out   | In    | Out   | Total |\n"
-  table_header = table_header .. "| ----------- | ----- | ----- | ----- | ----- | ----- | ----- | ----- |\n"
+  local table_header = "| Date       | Day   | In    | Out   | In    | Out   | In    | Out   | Total |\n"
+  table_header = table_header .. "| ---------- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- |\n"
 
   local table_rows = {}
-  local grand_total_row = "| GrandTotal  |"
+  local grand_total_row = "| GrandTotal |       |"
 
   for _, entry in ipairs(data) do
     local date = entry.date
     local weekday = get_weekday_from_date(date)
     local times = entry.times
-    local row = string.format("| %s (%s) |", date, weekday)
-    local total_time = "00:00" -- Placeholder, you'd calculate this
+    local row = string.format("| %s |  %s  |", date, weekday)
 
     -- Add time entries, only if they exist
     for i = 1, math.floor(#times / 2) do -- Iterate up to the number of pairs
