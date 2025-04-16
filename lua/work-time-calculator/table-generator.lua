@@ -1,44 +1,6 @@
 ---@class TableGenerator
 local M = {}
 
-local function extract_times_from_file(filepath)
-  local lines = {}
-  local f = io.open(filepath, "r")
-  if not f then
-    return nil, "Could not open file: " .. filepath
-  end
-  for line in f:lines() do
-    table.insert(lines, line)
-  end
-  f:close()
-
-  local schedule_start = nil
-  for i, line in ipairs(lines) do
-    if string.find(line, "## Schedule") then
-      schedule_start = i
-      break
-    end
-  end
-
-  if not schedule_start then
-    return {}, nil
-  end
-
-  local times = {}
-  for i = schedule_start + 1, #lines do
-    local line = lines[i]
-    if string.find(line, "## Plan:") then
-      break
-    end
-    local time = string.match(line, "%s*(%d%d:%d%d)")
-    if time then
-      table.insert(times, time)
-    end
-  end
-
-  return times, nil
-end
-
 local function get_weekday_from_date(date_str)
   -- Assuming date format is YYYY-MM-DD
   local year, month, day = date_str:match("(%d+)-(%d+)-(%d+)")
@@ -57,6 +19,55 @@ local function get_weekday_from_date(date_str)
   return weekday
 end
 
+local function extract_times_from_file(filepath)
+  local lines = {}
+  local f = io.open(filepath, "r")
+  if not f then
+    return nil, nil, "Could not open file: " .. filepath
+  end
+  for line in f:lines() do
+    table.insert(lines, line)
+  end
+  f:close()
+
+  local schedule_start = nil
+  for i, line in ipairs(lines) do
+    if string.find(line, "## Schedule") then
+      schedule_start = i
+      break
+    end
+  end
+
+  local times = {}
+  local day_type = "Work day"
+
+  if not schedule_start then
+    return times, day_type, nil
+  end
+
+  for i = schedule_start + 1, #lines do
+    local line = string.lower(lines[i])
+    if string.find(line, "## plan:") then
+      break
+    end
+    local time = string.match(line, "%s*(%d%d:%d%d)")
+    if time then
+      table.insert(times, time)
+    end
+    if string.find(line, "sick") then
+      day_type = "Sick day"
+    end
+    if string.find(line, "vac") then
+      day_type = "Vacation"
+    end
+    if string.find(line, "holiday") then
+      day_type = "Holiday"
+    end
+  end
+
+  return times, day_type, nil
+end
+
 local function generate_markdown_table(data, workday_length)
   local table_header =
     "| Date       | Day   | Type     | In    | Out   | In    | Out   | In    | Out   | Total | Goal  | Diff  |\n"
@@ -70,14 +81,14 @@ local function generate_markdown_table(data, workday_length)
     local date = entry.date
     local weekday = get_weekday_from_date(date)
     local times = entry.times
+    local day_type = entry.day_type
     local row = string.format("| %s | %s   |", date, weekday)
 
-    -- Add type based on weekday
-    local type_str = "Work day"
+    -- Change day type based on weekday
     if weekday == "Sat" or weekday == "Sun" then
-      type_str = "Weekend"
+      day_type = "Weekend"
     end
-    row = row .. string.format(" %-8s |", type_str)
+    row = row .. string.format(" %-8s |", day_type)
 
     -- Add time entries, only if they exist
     for i = 1, math.floor(#times / 2) do -- Iterate up to the number of pairs
@@ -91,9 +102,9 @@ local function generate_markdown_table(data, workday_length)
     end
 
     -- Add goal and diff
-    local goal = "00:00"
-    if weekday ~= "Sat" and weekday ~= "Sun" then
-      goal = workday_length
+    local goal = workday_length
+    if day_type ~= "Work day" then
+      goal = "00:00"
     end
     row = row .. string.format("       | %s |       |\n", goal)
     table.insert(table_rows, row)
@@ -143,7 +154,7 @@ function M.generate_hours_table(config)
   local data = {}
 
   for _, filepath in ipairs(daily_notes) do
-    local times, err = extract_times_from_file(filepath)
+    local times, day_type, err = extract_times_from_file(filepath)
     if err then
       vim.notify("Error processing " .. filepath .. ": " .. err, vim.log.levels.ERROR)
     else
@@ -151,6 +162,7 @@ function M.generate_hours_table(config)
       data[#data + 1] = {
         date = filename,
         times = times,
+        day_type = day_type,
       }
     end
   end
