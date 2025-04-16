@@ -30,7 +30,6 @@ M.calculate_time = function()
   table_generator.generate_hours_table(M.config)
   vim.cmd("edit! " .. M.config.output_file)
   time_calculator.calculate_time()
-  table_generator.add_goal_column(M.config)
 
   -- Reload the buffer
   vim.cmd("e! " .. M.config.output_file)

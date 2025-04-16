@@ -57,9 +57,10 @@ local function get_weekday_from_date(date_str)
   return weekday
 end
 
-local function generate_markdown_table(data)
-  local table_header = "| Date       | Day   | In    | Out   | In    | Out   | In    | Out   | Total |\n"
-  table_header = table_header .. "| ---------- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- |\n"
+local function generate_markdown_table(data, workday_length)
+  local table_header = "| Date       | Day   | In    | Out   | In    | Out   | In    | Out   | Total | Goal  |\n"
+  table_header = table_header
+    .. "| ---------- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- |\n"
 
   local table_rows = {}
   local grand_total_row = "| GrandTotal |       |"
@@ -78,14 +79,19 @@ local function generate_markdown_table(data)
     -- Pad with empty cells if needed
     local num_time_pairs = math.floor(#times / 2)
     for i = 1, 3 - num_time_pairs do
-      row = row .. "   -   |   -   |"
+      row = row .. "       |       |"
     end
 
-    row = row .. string.format(" %s |\n", total_time)
+    -- Add total time and goal
+    local goal = "00:00"
+    if weekday ~= "Sat" and weekday ~= "Sun" then
+      goal = workday_length
+    end
+    row = row .. string.format("       | %s |\n", goal)
     table.insert(table_rows, row)
   end
 
-  grand_total_row = grand_total_row .. "   -   |   -   |   -   |   -   |   -   |   -   | 00:00 |\n"
+  grand_total_row = grand_total_row .. "       |       |       |       |       |       |       |       |\n"
 
   return table_header .. table.concat(table_rows, "") .. grand_total_row
 end
@@ -133,7 +139,7 @@ function M.generate_hours_table(config)
     end
   end
 
-  local markdown_table = generate_markdown_table(data)
+  local markdown_table = generate_markdown_table(data, config.workday_length)
   local existing_header = read_existing_header(config.output_file)
   local output_content = ""
 
@@ -152,52 +158,6 @@ function M.generate_hours_table(config)
   f:close()
 
   vim.notify("Hours table generated at " .. config.output_file, vim.log.levels.INFO)
-end
-
-local function generate_goal_column(content, workday_length)
-  local lines = {}
-  for line in content:gmatch("[^\n]+") do
-    if line:match("^|") then
-      if line:match("GrandTotal") then
-        line = line:gsub("|$", "|       |")
-      elseif line:match("^| Date") then
-        line = line:gsub("|$", "| Goal  |")
-      elseif line:match("^| %-") then
-        line = line:gsub("|$", "| ----- |")
-      else
-        local weekday = line:match("%((%w+)%)")
-        local goal = "00:00"
-        if weekday and weekday ~= "Sat" and weekday ~= "Sun" then
-          goal = workday_length
-        end
-        line = line:gsub("|$", "| " .. goal .. " |")
-      end
-    end
-    table.insert(lines, line)
-  end
-  return table.concat(lines, "\n")
-end
-
----@param config WorkTimeCalculatorConfig
-function M.add_goal_column(config)
-  -- Read the file after time calculation
-  local f = io.open(config.output_file, "r")
-  if not f then
-    return
-  end
-  local content = f:read("*all")
-  f:close()
-
-  -- Add goal column
-  content = generate_goal_column(content, config.workday_length)
-
-  -- Write back to file
-  f = io.open(config.output_file, "w")
-  if not f then
-    return
-  end
-  f:write(content)
-  f:close()
 end
 
 return M
