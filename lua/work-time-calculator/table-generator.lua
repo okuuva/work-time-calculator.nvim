@@ -21,7 +21,7 @@ local function extract_times_from_file(filepath)
   end
 
   if not schedule_start then
-    return nil, "No '## Schedule' found in " .. filepath
+    return {}, nil
   end
 
   local times = {}
