@@ -122,6 +122,14 @@ local function read_existing_header(filepath)
   end
 end
 
+local function add_formulas(content)
+  return content
+    .. "<!-- TBLFM: $9=((($4 - $3) + ($6 - $5)) + ($8 - $7));hm -->\n"
+    .. "<!-- TBLFM: @>$9=sum(@I..@-1);hm -->\n"
+    .. "<!-- TBLFM: @>$10=sum(@I..@-1);hm -->\n"
+    .. "<!-- TBLFM: $11=($9-$10);hm -->\n"
+end
+
 ---@param config WorkTimeCalculatorConfig
 function M.generate_hours_table(config)
   local daily_notes = vim.fn.glob(config.daily_notes_dir .. "/*.md", 1, 1)
@@ -149,6 +157,7 @@ function M.generate_hours_table(config)
   end
 
   output_content = output_content .. "\n# Hours\n\n" .. markdown_table
+  output_content = add_formulas(output_content)
 
   local f = io.open(config.output_file, "w")
   if not f then
