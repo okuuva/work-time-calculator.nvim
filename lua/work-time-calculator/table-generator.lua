@@ -59,18 +59,25 @@ end
 
 local function generate_markdown_table(data, workday_length)
   local table_header =
-    "| Date       | Day   | In    | Out   | In    | Out   | In    | Out   | Total | Goal  | Diff  |\n"
+    "| Date       | Day   | Type     | In    | Out   | In    | Out   | In    | Out   | Total | Goal  | Diff  |\n"
   table_header = table_header
-    .. "| ---------- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | -----:|\n"
+    .. "| ---------- | ----- | -------- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | ----- | -----:|\n"
 
   local table_rows = {}
-  local grand_total_row = "| GrandTotal |       |"
+  local grand_total_row = "| GrandTotal |       |          |"
 
   for _, entry in ipairs(data) do
     local date = entry.date
     local weekday = get_weekday_from_date(date)
     local times = entry.times
     local row = string.format("| %s | %s   |", date, weekday)
+
+    -- Add type based on weekday
+    local type_str = "Work day"
+    if weekday == "Sat" or weekday == "Sun" then
+      type_str = "Weekend"
+    end
+    row = row .. string.format(" %-8s |", type_str)
 
     -- Add time entries, only if they exist
     for i = 1, math.floor(#times / 2) do -- Iterate up to the number of pairs
@@ -124,10 +131,10 @@ end
 
 local function add_formulas(content)
   return content
-    .. "<!-- TBLFM: $9=((($4 - $3) + ($6 - $5)) + ($8 - $7));hm -->\n"
-    .. "<!-- TBLFM: @>$9=sum(@I..@-1);hm -->\n"
+    .. "<!-- TBLFM: $10=((($5 - $4) + ($7 - $6)) + ($9 - $8));hm -->\n"
     .. "<!-- TBLFM: @>$10=sum(@I..@-1);hm -->\n"
-    .. "<!-- TBLFM: $11=($9-$10);hm -->\n"
+    .. "<!-- TBLFM: @>$11=sum(@I..@-1);hm -->\n"
+    .. "<!-- TBLFM: $12=($10-$11);hm -->\n"
 end
 
 ---@param config WorkTimeCalculatorConfig
