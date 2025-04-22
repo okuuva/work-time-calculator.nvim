@@ -1,5 +1,5 @@
 -- main module file
-local table_generator = require("work-time-calculator.table-generator")
+local time_table = require("work-time-calculator.time-table")
 local time_calculator = require("time-calculator")
 
 ---@class WorkTimeCalculatorConfig
@@ -27,9 +27,8 @@ M.setup = function(args)
 end
 
 M.calculate_time = function()
-  table_generator.generate_hours_table(M.config)
+  time_table.generate_hours_table(M.config)
   vim.cmd("edit! " .. M.config.output_file)
-  time_calculator.calculate_time()
 
   -- Reload the buffer
   vim.cmd("e! " .. M.config.output_file)
