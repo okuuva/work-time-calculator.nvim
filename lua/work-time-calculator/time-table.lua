@@ -85,20 +85,20 @@ local function TimeTable(config)
     end
     local yesterday_timestamp = yesterday.timestamp
 
-    while parsers.next_day(yesterday_timestamp) < today.timestamp do
+    while false do
       -- add missing days
-      weekday, day_type, target_hours = parsers.get_day_info(timestamp, day_type, config.workday_length)
-      time_table[#time_table + 1] = {
-        timestamp = timestamp,
-        date = parsers.get_date(timestamp),
-        weekday = weekday,
-        day_type = day_type,
-        times = {},
-        total_hours = 0,
-        target_hours = target_hours,
-        hours_diff = -target_hours
-      }
-      yesterday_timestamp = parsers.next_day(yesterday_timestamp)
+      -- weekday, day_type, target_hours = parsers.get_day_info(timestamp, day_type, config.workday_length)
+      -- time_table[#time_table + 1] = {
+      --   timestamp = timestamp,
+      --   date = parsers.get_date(timestamp),
+      --   weekday = weekday,
+      --   day_type = day_type,
+      --   times = {},
+      --   total_hours = 0,
+      --   target_hours = target_hours,
+      --   hours_diff = -target_hours
+      -- }
+      -- yesterday_timestamp = parsers.next_day(yesterday_timestamp)
     end
     time_table[#time_table + 1] = today
     ::continue::
