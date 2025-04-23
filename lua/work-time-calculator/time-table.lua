@@ -13,11 +13,17 @@ local parsers = require("work-time-calculator.parsers")
 ---@field hours_diff integer
 local DayEntry = {}
 
----@param timestamp Timestamp
----@param workday_length string
----@param day_type string
----@param times table<string>
-function DayEntry.from_timestamp(timestamp, workday_length, day_type, times)
+---@class DayInfo
+---@field timestamp Timestamp
+---@field workday_length string
+---@field day_type string
+---@field times table<string>
+local DayInfo = {}
+
+---@param info DayInfo
+---@return DayEntry
+function DayEntry.from_timestamp(info)
+  local timestamp, workday_length, day_type, times = unpack(info)
   local weekday = parsers.get_weekday(timestamp)
   local target_hours = parsers.time_to_minutes(workday_length)
   if weekday == "Sat" or weekday == "Sun" then
@@ -67,7 +73,12 @@ function DayEntry.new(filepath, workday_length)
     return {}, "Could not parse date"
   end
 
-  return DayEntry.from_timestamp(timestamp, workday_length, day_type, times), nil
+  return DayEntry.from_timestamp({
+    timestamp,
+    workday_length,
+    day_type,
+    times,
+  }), nil
 end
 
 ---@alias TimeTable table<number, DayEntry>
@@ -95,7 +106,12 @@ local function TimeTable(config)
     local missing_timestamp = parsers.next_day(yesterday.timestamp)
     while missing_timestamp < today.timestamp do
       -- add missing days
-      time_table[#time_table + 1] = DayEntry.from_timestamp(missing_timestamp, config.workday_length, "Work day", {})
+      time_table[#time_table + 1] = DayEntry.from_timestamp({
+        missing_timestamp,
+        config.workday_length,
+        "Work day",
+        {},
+      })
       missing_timestamp = parsers.next_day(missing_timestamp)
     end
     time_table[#time_table + 1] = today
