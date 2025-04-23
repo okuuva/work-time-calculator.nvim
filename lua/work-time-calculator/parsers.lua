@@ -58,10 +58,15 @@ M.time_to_minutes = time_to_minutes
 ---@return string ...
 local function minutes_to_time(...)
   local results = {}
+  local sign = ""
   for _, minutes in ipairs({ ... }) do
+    if minutes < 0 then
+      minutes = -minutes
+      sign = "-"
+    end
     local hours = math.floor(minutes / 60)
     local remaining_minutes = minutes % 60
-    results[#results + 1] = string.format("%02d:%02d", hours, remaining_minutes)
+    results[#results + 1] = string.format("%s%02d:%02d", sign, hours, remaining_minutes)
   end
   return unpack(results)
 end
