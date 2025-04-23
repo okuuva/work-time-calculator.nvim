@@ -11,24 +11,13 @@ local parsers = require("work-time-calculator.parsers")
 ---@field total_hours integer
 ---@field target_hours integer
 ---@field hours_diff integer
-local E = {}
+local DayEntry = {}
 
----@param filepath string
+---@param timestamp Timestamp
 ---@param workday_length string
----@return DayEntry, string?
-local function DayEntry(filepath, workday_length)
-  local times, day_type, err = parsers.extract_times_from_file(filepath)
-  if err then
-    return {}, err
-  end
-
-  local filename = vim.fn.fnamemodify(filepath, ":t:r")
-  local timestamp = parsers.get_timestamp(filename)
-  if timestamp == nil then
-    return {}, "Could not parse date"
-  end
-
-
+---@param day_type string
+---@param times table<string>
+function DayEntry.from_timestamp(timestamp, workday_length, day_type, times)
   local weekday = parsers.get_weekday(timestamp)
   local target_hours = parsers.time_to_minutes(workday_length)
   if weekday == "Sat" or weekday == "Sun" then
@@ -52,15 +41,33 @@ local function DayEntry(filepath, workday_length)
 
   ---@type DayEntry
   return {
-      timestamp = timestamp,
-      date = filename,
-      weekday = weekday,
-      day_type = day_type,
-      times = times,
-      target_hours = target_hours,
-      total_hours = total_hours,
-      hours_diff = hours_diff,
-    }
+    timestamp = timestamp,
+    date = parsers.get_date(timestamp),
+    weekday = weekday,
+    day_type = day_type,
+    times = times,
+    target_hours = target_hours,
+    total_hours = total_hours,
+    hours_diff = hours_diff,
+  }
+end
+
+---@param filepath string
+---@param workday_length string
+---@return DayEntry, string?
+function DayEntry.new(filepath, workday_length)
+  local times, day_type, err = parsers.extract_times_from_file(filepath)
+  if err then
+    return {}, err
+  end
+
+  local filename = vim.fn.fnamemodify(filepath, ":t:r")
+  local timestamp = parsers.get_timestamp(filename)
+  if timestamp == nil then
+    return {}, "Could not parse date"
+  end
+
+  return DayEntry.from_timestamp(timestamp, workday_length, day_type, times), nil
 end
 
 ---@alias TimeTable table<number, DayEntry>
@@ -73,7 +80,7 @@ local function TimeTable(config)
   local daily_notes = vim.fn.glob(config.daily_notes_dir .. "/*.md", true, true)
 
   for _, filepath in ipairs(daily_notes) do
-    local today, err = DayEntry(filepath, config.workday_length)
+    local today, err = DayEntry.new(filepath, config.workday_length)
     if err ~= nil then
       vim.notify("Error processing " .. filepath .. ": " .. err, vim.log.levels.ERROR)
       goto continue
