@@ -85,27 +85,18 @@ local function TimeTable(config)
       vim.notify("Error processing " .. filepath .. ": " .. err, vim.log.levels.ERROR)
       goto continue
     end
-    local yesterday = time_table[#time_table - 1]
+
+    local yesterday = time_table[#time_table]
     if yesterday == nil then
       time_table[#time_table + 1] = today
       goto continue
     end
-    local yesterday_timestamp = yesterday.timestamp
 
-    while false do
+    local missing_timestamp = parsers.next_day(yesterday.timestamp)
+    while missing_timestamp < today.timestamp do
       -- add missing days
-      -- weekday, day_type, target_hours = parsers.get_day_info(timestamp, day_type, config.workday_length)
-      -- time_table[#time_table + 1] = {
-      --   timestamp = timestamp,
-      --   date = parsers.get_date(timestamp),
-      --   weekday = weekday,
-      --   day_type = day_type,
-      --   times = {},
-      --   total_hours = 0,
-      --   target_hours = target_hours,
-      --   hours_diff = -target_hours
-      -- }
-      -- yesterday_timestamp = parsers.next_day(yesterday_timestamp)
+      time_table[#time_table + 1] = DayEntry.from_timestamp(missing_timestamp, config.workday_length, "Work day", {})
+      missing_timestamp = parsers.next_day(missing_timestamp)
     end
     time_table[#time_table + 1] = today
     ::continue::
