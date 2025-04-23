@@ -1,6 +1,7 @@
 -- main module file
 local config = require("work-time-calculator.config")
 local time_table = require("work-time-calculator.time-table")
+local mtm = require("markdown-table-mode")
 
 ---@class WorkTimeCalculator
 local M = {}
@@ -16,7 +17,10 @@ end
 M.calculate_time = function()
   time_table.generate_hours_table(M.config)
   vim.cmd("edit! " .. M.config.output_file) -- open the output file
-  vim.cmd("normal Gi") -- go to insert mode on the last line so markdown-table-mode can reformat the table
+  vim.cmd("normal G") -- go to the last line so markdown-table-mode can reformat the table
+  if mtm ~= nil then
+    mtm.format_markdown_table()
+  end
 end
 
 return M
