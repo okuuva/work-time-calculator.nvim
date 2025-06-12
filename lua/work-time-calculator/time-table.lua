@@ -170,9 +170,11 @@ local function generate_markdown_table(time_table)
     end
 
     -- Pad with empty cells if needed
-    local num_time_pairs = math.floor(#entry.times / 2)
-    for _ = 1, 3 - num_time_pairs do
-      row = row .. "|    |       "
+    if #entry.times < most_records then
+      local num_time_pairs = math.floor(#entry.times / 2)
+      for _ = 1, 2 - num_time_pairs do
+        row = row .. "|    |       "
+      end
     end
 
     row = row
