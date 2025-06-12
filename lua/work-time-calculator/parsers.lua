@@ -163,6 +163,9 @@ local function extract_times_from_file(filepath)
     if string.find(line, "holiday") then
       day_type = "Holiday"
     end
+    if string.find(line, "day off") then
+      day_type = "A day off"
+    end
   end
 
   return times, day_type, nil
