@@ -169,12 +169,11 @@ local function generate_markdown_table(time_table)
       row = row .. string.format("| %s | %s ", entry.times[2 * i - 1], entry.times[2 * i])
     end
 
-    -- Pad with empty cells if needed
-    if #entry.times < most_records then
-      local num_time_pairs = math.floor(#entry.times / 2)
-      for _ = 1, 2 - num_time_pairs do
-        row = row .. "|    |       "
-      end
+    -- Pad with empty cells if needed, ensure always right number of columns
+    local num_time_pairs = math.floor(#entry.times / 2)
+    local max_pairs = math.floor(most_records / 2)
+    for i = num_time_pairs * 2 + 1, max_pairs * 2 do
+      row = row .. "|    "
     end
 
     row = row
