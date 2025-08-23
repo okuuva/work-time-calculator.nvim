@@ -190,6 +190,8 @@ local function generate_markdown_table(time_table)
   return table_header .. table.concat(table_rows, "") .. total_row
 end
 
+M.generate_markdown_table = generate_markdown_table
+
 ---@param config wtc.Config
 local function generate_hours_table(config)
   local time_table = TimeTable(config)
