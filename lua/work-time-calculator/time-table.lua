@@ -139,6 +139,16 @@ local function most_entries(time_table)
   return max
 end
 
+local function padRow(row, times_count, most_records)
+  -- Pad with empty cells if needed, ensure always right number of columns
+  local num_time_pairs = math.floor(times_count / 2)
+  local max_pairs = math.floor(most_records / 2)
+  for i = num_time_pairs * 2 + 1, max_pairs * 2 do
+    row = row .. "|    "
+  end
+  return row
+end
+
 ---@param time_table TimeTable
 ---@return string
 local function generate_markdown_table(time_table)
@@ -169,12 +179,7 @@ local function generate_markdown_table(time_table)
       row = row .. string.format("| %s | %s ", entry.times[2 * i - 1], entry.times[2 * i])
     end
 
-    -- Pad with empty cells if needed, ensure always right number of columns
-    local num_time_pairs = math.floor(#entry.times / 2)
-    local max_pairs = math.floor(most_records / 2)
-    for i = num_time_pairs * 2 + 1, max_pairs * 2 do
-      row = row .. "|    "
-    end
+    row = padRow(row, #entry.times, most_records)
 
     row = row
       .. string.format(
