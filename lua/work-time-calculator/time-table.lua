@@ -11,6 +11,7 @@ local parsers = require("work-time-calculator.parsers")
 ---@field total_hours integer
 ---@field target_hours integer
 ---@field hours_diff integer
+---@field carryover integer?
 local DayEntry = {}
 
 ---@class DayInfo
@@ -18,14 +19,18 @@ local DayEntry = {}
 ---@field workday_length string
 ---@field day_type string
 ---@field times table<string>
+---@field carryover string?
 local DayInfo = {}
 
 ---@param info DayInfo
 ---@return DayEntry
 function DayEntry.from_timestamp(info)
-  local timestamp, workday_length, day_type, times = unpack(info)
+  local timestamp, workday_length, day_type, times, carryover = unpack(info)
   local weekday = parsers.get_weekday(timestamp)
   local target_hours = parsers.time_to_minutes(workday_length)
+  if carryover then
+    carryover = parsers.time_to_minutes(carryover)
+  end
   if weekday == "Sat" or weekday == "Sun" then
     day_type = "Weekend"
   end
@@ -55,6 +60,7 @@ function DayEntry.from_timestamp(info)
     target_hours = target_hours,
     total_hours = total_hours,
     hours_diff = hours_diff,
+    carryover = carryover,
   }
 end
 
@@ -62,7 +68,7 @@ end
 ---@param workday_length string
 ---@return DayEntry, string?
 function DayEntry.new(filepath, workday_length)
-  local times, day_type, err = parsers.extract_times_from_file(filepath)
+  local times, day_type, carryover, err = parsers.extract_times_from_file(filepath)
   if err then
     return {}, err
   end
@@ -78,6 +84,7 @@ function DayEntry.new(filepath, workday_length)
     workday_length,
     day_type,
     times,
+    carryover,
   }), nil
 end
 
@@ -169,6 +176,14 @@ local function generate_markdown_table(time_table)
 
   local total, total_target, total_diff = 0, 0, 0
   for _, entry in ipairs(time_table) do
+    if entry.carryover then
+      total = total + entry.carryover
+      total_diff = total_diff + entry.carryover
+      local row = "| Carryover |       |       "
+      row = padRow(row, 0, most_records)
+      row = row .. string.format("| %s | %s | %s |\n", parsers.minutes_to_time(entry.carryover, 0, entry.carryover))
+      table_rows[#table_rows + 1] = row
+    end
     total = total + entry.total_hours
     total_target = total_target + entry.target_hours
     total_diff = total_diff + entry.hours_diff

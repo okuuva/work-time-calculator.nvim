@@ -119,7 +119,8 @@ end
 
 M.read_existing_header = read_existing_header
 
----@return table<string, string>, string, string?
+---@param filepath string
+---@return table<string, string>, string, string?, string?
 local function extract_times_from_file(filepath)
   local lines = {}
   local times = {}
@@ -145,6 +146,7 @@ local function extract_times_from_file(filepath)
     return times, day_type, nil
   end
 
+  local carryover = nil
   for i = schedule_start + 1, #lines do
     local line = string.lower(lines[i])
     if string.find(line, "## plan:") then
@@ -152,7 +154,11 @@ local function extract_times_from_file(filepath)
     end
     local time = string.match(line, "%s*(%d%d:%d%d)")
     if time then
-      table.insert(times, time)
+      if string.find(line, "carryover") then
+        carryover = time
+      else
+        table.insert(times, time)
+      end
     end
     if string.find(line, "sick") then
       day_type = "Sick day"
@@ -168,7 +174,7 @@ local function extract_times_from_file(filepath)
     end
   end
 
-  return times, day_type, nil
+  return times, day_type, carryover, nil
 end
 
 M.extract_times_from_file = extract_times_from_file
