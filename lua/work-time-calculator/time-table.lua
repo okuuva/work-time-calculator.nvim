@@ -29,7 +29,7 @@ function DayEntry.from_timestamp(info)
   if weekday == "Sat" or weekday == "Sun" then
     day_type = "Weekend"
   end
-  if day_type ~= "Work day" and day_type ~= "Sick day" and day_type ~= "A day off" then
+  if day_type ~= "Work day" and day_type ~= "Sick day" and day_type ~= "A day-off" then
     target_hours = 0
   end
 
