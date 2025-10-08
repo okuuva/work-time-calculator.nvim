@@ -54,6 +54,52 @@ describe("generate_markdown_table", function()
     assert.are.same(expected_markdown, "\n" .. markdown)
   end)
 
+  it("handles a day with no times (e.g. vacation)", function()
+    local time_table = {
+      {
+        date = "2024-08-04",
+        weekday = "Sun",
+        day_type = "Vacation",
+        times = {},
+        total_hours = 0,
+        target_hours = 0,
+        hours_diff = 0,
+      }
+    }
+    local markdown = tt.generate_markdown_table(time_table)
+    local expected_markdown = [[
+
+| Date | Day | Type | Total | Goal | Diff |
+| ---- | --- | ---- | ----- | ---- | ---- |
+| 2024-08-04 | Sun | Vacation | 00:00 | 00:00 | 00:00 |
+| Total |       |       | 00:00 | 00:00 | 00:00 |
+]]
+    assert.are.same(expected_markdown, "\n" .. markdown)
+  end)
+
+  it("handles a day with an odd number of times (should ignore the last unmatched time)", function()
+    local time_table = {
+      {
+        date = "2024-08-05",
+        weekday = "Mon",
+        day_type = "Work day",
+        times = { "08:00", "12:00", "13:00" }, -- 1.5 pairs, should ignore last
+        total_hours = 4 * 60, -- Only one pair added
+        target_hours = 8 * 60,
+        hours_diff = -4 * 60,
+      }
+    }
+    local markdown = tt.generate_markdown_table(time_table)
+    local expected_markdown = [[
+
+| Date | Day | Type | In | Out | In | Out | Total | Goal | Diff |
+| ---- | --- | ---- | -- | --- | -- | --- | ----- | ---- | ---- |
+| 2024-08-05 | Mon | Work day | 08:00 | 12:00 | 13:00 |    | 04:00 | 08:00 | -04:00 |
+| Total |       |       |      |      |      |      | 04:00 | 08:00 | -04:00 |
+]]
+    assert.are.same(expected_markdown, "\n" .. markdown)
+  end)
+
   it("handles a single day with the maximum number of pairs", function()
     local time_table = {
       {
@@ -116,6 +162,29 @@ describe("generate_markdown_table", function()
 | 2024-08-08 | Thu | Work day | 09:00 | 17:00 |    |    | 08:00 | 08:00 | 00:00 |
 | 2024-08-09 | Fri | Work day | 08:30 | 12:30 | 13:30 | 17:30 | 08:00 | 08:00 | 00:00 |
 | Total |       |       |      |      |      |      | 20:00 | 24:00 | -04:00 |
+]]
+    assert.are.same(expected_markdown, "\n" .. markdown)
+  end)
+
+  it("handles a day with only one time (should pad correctly)", function()
+    local time_table = {
+      {
+        date = "2024-08-10",
+        weekday = "Sat",
+        day_type = "Work day",
+        times = { "08:00" },
+        total_hours = 0,
+        target_hours = 8 * 60,
+        hours_diff = -8 * 60,
+      }
+    }
+    local markdown = tt.generate_markdown_table(time_table)
+    local expected_markdown = [[
+
+| Date | Day | Type | In | Out | Total | Goal | Diff |
+| ---- | --- | ---- | -- | --- | ----- | ---- | ---- |
+| 2024-08-10 | Sat | Work day | 08:00 |    | 00:00 | 08:00 | -08:00 |
+| Total |       |       |      |      | 00:00 | 08:00 | -08:00 |
 ]]
     assert.are.same(expected_markdown, "\n" .. markdown)
   end)
