@@ -99,18 +99,34 @@ local function read_existing_header(filepath)
     return nil
   end
 
-  -- Read the first 6 lines
-  for _ = 1, 6 do
+  -- Check if the first line is "---" (YAML frontmatter start)
+  local first_line = f:read()
+  if not first_line or first_line ~= "---" then
+    f:close()
+    return nil
+  end
+
+  -- Add the opening "---" line
+  table.insert(lines, first_line)
+
+  -- Read lines until we find the closing "---"
+  while true do
     local line = f:read()
-    if line then
-      table.insert(lines, line)
-    else
-      break -- Stop if the file has fewer than 6 lines
+    if not line then
+      -- End of file reached without finding closing "---"
+      break
+    end
+
+    table.insert(lines, line)
+
+    if line == "---" then
+      -- Found closing "---", stop reading
+      break
     end
   end
   f:close()
 
-  if #lines > 0 then
+  if #lines > 1 then -- At least opening "---" and one more line
     return table.concat(lines, "\n") .. "\n"
   else
     return nil
