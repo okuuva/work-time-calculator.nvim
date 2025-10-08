@@ -33,21 +33,19 @@ function DayEntry.from_timestamp(info)
   end
   if weekday == "Sat" or weekday == "Sun" then
     day_type = "Weekend"
-  end
-  if day_type ~= "Work day" and day_type ~= "Sick day" and day_type ~= "A day-off" then
     target_hours = 0
   end
 
   local total_hours = parsers.get_total_time(times)
-
   local hours_diff = total_hours - target_hours
-  if day_type == "Sick day" then
-    if hours_diff < 0 then
-      hours_diff = 0
-      target_hours = total_hours
+  if day_type ~= "Work day" then
+    if total_hours > 0 then
+      day_type = day_type .. "*"
+      hours_diff = total_hours
     else
-      day_type = "Work day*"
+      hours_diff = 0
     end
+    total_hours = target_hours
   end
 
   ---@type DayEntry
