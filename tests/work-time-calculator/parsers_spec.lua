@@ -44,5 +44,29 @@ describe('parsers', function()
     assert.are.same({}, times)
     assert.is_truthy(err)
   end)
+
+  it('next_day handles DST transitions correctly', function()
+    -- Test DST transition in October 2025 (clocks go back on Oct 26)
+    -- This ensures next_day produces timestamps that match get_timestamp
+    local oct25 = parsers.get_timestamp('2025-10-25')
+    local oct26_next = parsers.next_day(oct25)
+    local oct27_next = parsers.next_day(oct26_next)
+
+    local oct26_direct = parsers.get_timestamp('2025-10-26')
+    local oct27_direct = parsers.get_timestamp('2025-10-27')
+
+    assert.are.same(oct26_direct, oct26_next, 'Oct 26 timestamps should match')
+    assert.are.same(oct27_direct, oct27_next, 'Oct 27 timestamps should match')
+  end)
+
+  it('next_day produces consistent date strings across DST', function()
+    -- Ensure that next_day produces the correct date string even across DST
+    local oct25 = parsers.get_timestamp('2025-10-25')
+    local oct26 = parsers.next_day(oct25)
+    local oct27 = parsers.next_day(oct26)
+
+    assert.are.same('2025-10-26', parsers.get_date(oct26))
+    assert.are.same('2025-10-27', parsers.get_date(oct27))
+  end)
 end)
 

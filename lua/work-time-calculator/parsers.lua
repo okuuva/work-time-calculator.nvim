@@ -2,13 +2,16 @@
 local M = {}
 
 ---@alias Timestamp integer
----@type Timestamp
-local day = 24 * 60 * 60
 
 ---@param timestamp Timestamp
 ---@return Timestamp
 local function next_day(timestamp)
-  return timestamp + day
+  -- Convert timestamp to date table, increment day, and convert back
+  -- Clear isdst to let os.time determine the correct DST setting for the new date
+  local date_table = os.date("*t", timestamp) --[[@as table]]
+  date_table.day = date_table.day + 1
+  date_table.isdst = nil
+  return os.time(date_table)
 end
 
 M.next_day = next_day
