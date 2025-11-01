@@ -17,7 +17,7 @@ end
 M.calculate_time = function()
   time_table.generate_hours_table(M.config)
   vim.cmd("edit! " .. M.config.output_file) -- open the output file
-  vim.cmd("normal G") -- go to the last line so markdown-table-mode can reformat the table
+  vim.cmd("keepjumps normal! G") -- go to the last line so markdown-table-mode can reformat the table
   if mtm ~= nil then
     mtm.format_markdown_table()
   end
