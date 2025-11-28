@@ -124,7 +124,7 @@ local function TimeTable(config)
   local last_entry = table.remove(time_table, #time_table)
   if last_entry == nil then
     vim.notify("No daily notes found", vim.log.levels.ERROR)
-  elseif last_entry.total_hours ~= 0 then
+  else
     time_table[#time_table + 1] = last_entry
   end
   return time_table
