@@ -34,21 +34,17 @@ function DayEntry.from_timestamp(info)
   if weekday == "Sat" or weekday == "Sun" then
     day_type = "Weekend"
   end
-  if day_type == "Holiday" or day_type == "Weekend" then
+  -- A day-off keeps normal target hours, other non-work days have 0
+  if day_type ~= "A day-off" and day_type ~= "Work day" then
     target_hours = 0
   end
 
   local total_hours = parsers.get_total_time(times)
-  local hours_diff = total_hours - target_hours
-  if day_type ~= "Work day" then
-    if total_hours > 0 then
-      day_type = day_type .. "*"
-      hours_diff = total_hours
-    else
-      hours_diff = 0
-    end
-    total_hours = target_hours
+  -- Mark non-work days with hours worked with an asterisk
+  if day_type ~= "Work day" and total_hours > 0 then
+    day_type = day_type .. "*"
   end
+  local hours_diff = total_hours - target_hours
 
   ---@type DayEntry
   return {
