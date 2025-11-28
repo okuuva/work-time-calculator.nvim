@@ -155,6 +155,24 @@ local function padRow(row, times_count, most_records)
 end
 
 ---@param time_table TimeTable
+---@return integer, integer
+local function count_special_days(time_table)
+  local vacation_days = 0
+  local sick_days = 0
+  for _, entry in ipairs(time_table) do
+    -- Check for Vacation or Vacation* (worked on vacation)
+    if string.find(entry.day_type, "^Vacation") then
+      vacation_days = vacation_days + 1
+    end
+    -- Check for Sick day or Sick day* (worked on sick day)
+    if string.find(entry.day_type, "^Sick day") then
+      sick_days = sick_days + 1
+    end
+  end
+  return vacation_days, sick_days
+end
+
+---@param time_table TimeTable
 ---@return string
 local function generate_markdown_table(time_table)
   local table_header = ""
@@ -214,6 +232,7 @@ local function generate_hours_table(config)
   local time_table = TimeTable(config)
 
   local markdown_table = generate_markdown_table(time_table)
+  local vacation_days, sick_days = count_special_days(time_table)
   local existing_header = parsers.read_existing_header(config.output_file)
   local output_content = ""
 
@@ -222,6 +241,9 @@ local function generate_hours_table(config)
   end
 
   output_content = output_content .. "# Hours\n\n" .. markdown_table
+  output_content = output_content .. "\n"
+  output_content = output_content .. "**Vacation days:** " .. vacation_days .. "\n"
+  output_content = output_content .. "**Sick leave days:** " .. sick_days .. "\n"
 
   local f = io.open(config.output_file, "w")
   if not f then
