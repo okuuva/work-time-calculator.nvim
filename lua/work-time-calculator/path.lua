@@ -38,7 +38,9 @@ end
 ---@param timestamp Timestamp?
 ---@return string
 function M.get_output_file_path(config, timestamp)
-  return ""
+  local base_dir = M.get_daily_note_base_dir(config, timestamp)
+  local parsed_output_file = os.date(config.output_file, timestamp) --[[@as string]]
+  return vim.fs.joinpath(base_dir, parsed_output_file)
 end
 
 return M
