@@ -43,4 +43,50 @@ function M.get_output_file_path(config, timestamp)
   return vim.fs.joinpath(base_dir, parsed_output_file)
 end
 
+---Get the timestamp from a file path if it's a daily note, or nil otherwise
+---Checks that the path is within the daily_notes_dir and matches the date_format
+---@param config wtc.Config
+---@param filepath string The file path to check
+---@return integer? timestamp The parsed timestamp, or nil if the path is not a daily note
+function M.get_timestamp_from_filepath(config, filepath)
+  local daily_notes_dir = config.daily_notes_dir
+  if not daily_notes_dir then
+    return nil
+  end
+
+  -- Normalize paths (ensure trailing slash for directory comparison)
+  daily_notes_dir = vim.fs.normalize(daily_notes_dir)
+  filepath = vim.fs.normalize(filepath)
+
+  -- Check if filepath is within the daily_notes_dir
+  if not vim.startswith(filepath, daily_notes_dir .. "/") then
+    return nil
+  end
+
+  -- Get the relative path from daily_notes_dir (without the .md extension)
+  local relative_path = filepath:sub(#daily_notes_dir + 2) -- +2 to skip the trailing slash
+  local relative_path_without_ext = relative_path:match("^(.+)%.md$")
+  if not relative_path_without_ext then
+    return nil
+  end
+
+  -- Try to parse using the full date_format (which may include subdirectories)
+  local parsed_ts = strptime.parse(relative_path_without_ext, config.date_format)
+  if not parsed_ts then
+    return nil
+  end
+
+  -- Convert to os.time format (noon) for consistency with Lua's os.time({ year, month, day })
+  local date_table = os.date("*t", parsed_ts) --[[@as table]]
+  return os.time({ year = date_table.year, month = date_table.month, day = date_table.day })
+end
+
+---Get the timestamp from the current buffer if it's a daily note, or nil otherwise
+---@param config wtc.Config
+---@return integer? timestamp The parsed timestamp, or nil if the buffer is not a daily note
+function M.get_timestamp_from_current_buffer(config)
+  local bufpath = vim.api.nvim_buf_get_name(0)
+  return M.get_timestamp_from_filepath(config, bufpath)
+end
+
 return M

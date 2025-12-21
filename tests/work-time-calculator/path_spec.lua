@@ -182,5 +182,72 @@ describe("path", function()
       assert.are.same("/notes/2023-03-hours.md", path.get_output_file_path(config, timestamp))
     end)
   end)
+
+  describe("get_timestamp_from_filepath", function()
+    it("returns timestamp for file in daily_notes_dir with simple date format", function()
+      local config = { daily_notes_dir = "/notes", date_format = "%Y-%m-%d" }
+      local filepath = "/notes/2024-06-15.md"
+      local expected_timestamp = os.time({ year = 2024, month = 6, day = 15 })
+      assert.are.same(expected_timestamp, path.get_timestamp_from_filepath(config, filepath))
+    end)
+
+    it("returns timestamp for file in daily_notes_dir with subdirectory date format", function()
+      local config = { daily_notes_dir = "/notes", date_format = "%Y/%m/%Y-%m-%d" }
+      local filepath = "/notes/2024/06/2024-06-15.md"
+      local expected_timestamp = os.time({ year = 2024, month = 6, day = 15 })
+      assert.are.same(expected_timestamp, path.get_timestamp_from_filepath(config, filepath))
+    end)
+
+    it("returns nil for file outside daily_notes_dir", function()
+      local config = { daily_notes_dir = "/notes", date_format = "%Y-%m-%d" }
+      local filepath = "/other/2024-06-15.md"
+      assert.is_nil(path.get_timestamp_from_filepath(config, filepath))
+    end)
+
+    it("returns nil for file in subdirectory of daily_notes_dir but wrong structure", function()
+      local config = { daily_notes_dir = "/notes", date_format = "%Y/%m/%Y-%m-%d" }
+      -- File is in daily_notes_dir but doesn't match the subdirectory structure
+      local filepath = "/notes/2024-06-15.md"
+      assert.is_nil(path.get_timestamp_from_filepath(config, filepath))
+    end)
+
+    it("returns nil when daily_notes_dir is nil", function()
+      local config = { daily_notes_dir = nil, date_format = "%Y-%m-%d" }
+      local filepath = "/notes/2024-06-15.md"
+      assert.is_nil(path.get_timestamp_from_filepath(config, filepath))
+    end)
+
+    it("returns nil for non-md file", function()
+      local config = { daily_notes_dir = "/notes", date_format = "%Y-%m-%d" }
+      local filepath = "/notes/2024-06-15.txt"
+      assert.is_nil(path.get_timestamp_from_filepath(config, filepath))
+    end)
+
+    it("returns nil for file with name not matching date format", function()
+      local config = { daily_notes_dir = "/notes", date_format = "%Y-%m-%d" }
+      local filepath = "/notes/my-notes.md"
+      assert.is_nil(path.get_timestamp_from_filepath(config, filepath))
+    end)
+
+    it("returns nil for file in parent directory of daily_notes_dir", function()
+      local config = { daily_notes_dir = "/notes/daily", date_format = "%Y-%m-%d" }
+      local filepath = "/notes/2024-06-15.md"
+      assert.is_nil(path.get_timestamp_from_filepath(config, filepath))
+    end)
+
+    it("handles paths with trailing slashes correctly", function()
+      local config = { daily_notes_dir = "/notes/", date_format = "%Y-%m-%d" }
+      local filepath = "/notes/2024-06-15.md"
+      local expected_timestamp = os.time({ year = 2024, month = 6, day = 15 })
+      assert.are.same(expected_timestamp, path.get_timestamp_from_filepath(config, filepath))
+    end)
+
+    it("returns nil for file that partially matches daily_notes_dir path", function()
+      local config = { daily_notes_dir = "/notes", date_format = "%Y-%m-%d" }
+      -- /notes-backup is not inside /notes
+      local filepath = "/notes-backup/2024-06-15.md"
+      assert.is_nil(path.get_timestamp_from_filepath(config, filepath))
+    end)
+  end)
 end)
 
