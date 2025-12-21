@@ -33,4 +33,12 @@ function M.get_daily_notes(config, timestamp)
   })
 end
 
+---Returns the full path to the output file (output_file joined with daily note base dir)
+---@param config wtc.Config
+---@param timestamp Timestamp?
+---@return string
+function M.get_output_file_path(config, timestamp)
+  return ""
+end
+
 return M

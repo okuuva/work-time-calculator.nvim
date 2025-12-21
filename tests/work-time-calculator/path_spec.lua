@@ -129,5 +129,58 @@ describe("path", function()
       assert.are.same(md_file, result[1])
     end)
   end)
+
+  describe("get_output_file_path", function()
+    it("returns output file in daily_notes_dir for simple date format", function()
+      local config = { daily_notes_dir = "/notes", date_format = "%Y-%m-%d", output_file = "time-tracking.md" }
+      assert.are.same("/notes/time-tracking.md", path.get_output_file_path(config))
+    end)
+
+    it("returns output file in subdirectory for date format with subdirs", function()
+      local config = { daily_notes_dir = "/notes", date_format = "%Y/%m/%Y-%m-%d", output_file = "hours.md" }
+      local timestamp = os.time({ year = 2024, month = 6, day = 15 })
+      assert.are.same("/notes/2024/06/hours.md", path.get_output_file_path(config, timestamp))
+    end)
+
+    it("uses default output file name when provided", function()
+      local config = { daily_notes_dir = "/my/notes", date_format = "%Y-%m-%d", output_file = "time-tracking.md" }
+      assert.are.same("/my/notes/time-tracking.md", path.get_output_file_path(config))
+    end)
+
+    it("handles custom output file name", function()
+      local config = { daily_notes_dir = "/notes", date_format = "%Y-%m-%d", output_file = "custom-hours.md" }
+      assert.are.same("/notes/custom-hours.md", path.get_output_file_path(config))
+    end)
+
+    it("handles nil daily_notes_dir", function()
+      local config = { daily_notes_dir = nil, date_format = "%Y-%m-%d", output_file = "time-tracking.md" }
+      -- When daily_notes_dir is nil, base dir becomes "/" so output file is at root
+      assert.are.same("/time-tracking.md", path.get_output_file_path(config))
+    end)
+
+    it("supports strftime formatting in output file name with year-month", function()
+      local config = { daily_notes_dir = "/notes", date_format = "%Y-%m-%d", output_file = "hours-%Y-%m.md" }
+      local timestamp = os.time({ year = 2024, month = 6, day = 15 })
+      assert.are.same("/notes/hours-2024-06.md", path.get_output_file_path(config, timestamp))
+    end)
+
+    it("supports strftime formatting in output file name with full date", function()
+      local config = { daily_notes_dir = "/notes", date_format = "%Y-%m-%d", output_file = "time-tracking-%Y-%m-%d.md" }
+      local timestamp = os.time({ year = 2024, month = 12, day = 25 })
+      assert.are.same("/notes/time-tracking-2024-12-25.md", path.get_output_file_path(config, timestamp))
+    end)
+
+    it("supports strftime formatting with subdirectory date format", function()
+      local config = { daily_notes_dir = "/notes", date_format = "%Y/%m/%Y-%m-%d", output_file = "hours-%Y-%m.md" }
+      local timestamp = os.time({ year = 2024, month = 6, day = 15 })
+      assert.are.same("/notes/2024/06/hours-2024-06.md", path.get_output_file_path(config, timestamp))
+    end)
+
+    it("handles output file with only strftime specifiers", function()
+      local config = { daily_notes_dir = "/notes", date_format = "%Y-%m-%d", output_file = "%Y-%m-hours.md" }
+      local timestamp = os.time({ year = 2023, month = 3, day = 10 })
+      assert.are.same("/notes/2023-03-hours.md", path.get_output_file_path(config, timestamp))
+    end)
+  end)
 end)
 
