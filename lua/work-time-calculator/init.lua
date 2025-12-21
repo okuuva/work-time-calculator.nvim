@@ -1,7 +1,6 @@
 -- main module file
 local config = require("work-time-calculator.config")
 local time_table = require("work-time-calculator.time-table")
-local path = require("work-time-calculator.path")
 local mtm = require("markdown-table-mode")
 
 ---@class WorkTimeCalculator
@@ -16,8 +15,10 @@ M.setup = function(args)
 end
 
 M.calculate_time = function()
-  local output_file_path = path.get_output_file_path(M.config)
-  time_table.generate_hours_table(M.config)
+  local output_file_path = time_table.generate_hours_table(M.config)
+  if not output_file_path then
+    return
+  end
   vim.cmd("edit! " .. output_file_path) -- open the output file
   vim.cmd("keepjumps normal! G3k") -- go to the last line of the table so markdown-table-mode can reformat it
   if mtm ~= nil then

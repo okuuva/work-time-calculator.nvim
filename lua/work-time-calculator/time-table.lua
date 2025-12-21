@@ -227,6 +227,7 @@ end
 M.generate_markdown_table = generate_markdown_table
 
 ---@param config wtc.Config
+---@return string? output_file_path The full path to the output file or nil if error occured
 local function generate_hours_table(config)
   local output_file_path = path.get_output_file_path(config)
   local time_table = TimeTable(config)
@@ -248,12 +249,13 @@ local function generate_hours_table(config)
   local f = io.open(output_file_path, "w")
   if not f then
     vim.notify("Could not open output file: " .. output_file_path, vim.log.levels.ERROR)
-    return
+    return nil
   end
   f:write(output_content)
   f:close()
 
   vim.notify("Hours table generated at " .. output_file_path, vim.log.levels.INFO)
+  return output_file_path
 end
 
 M.generate_hours_table = generate_hours_table
