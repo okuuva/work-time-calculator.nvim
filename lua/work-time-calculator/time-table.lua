@@ -246,6 +246,10 @@ local function generate_hours_table(config)
   output_content = output_content .. "**Vacation days:** " .. vacation_days .. "\n"
   output_content = output_content .. "**Sick leave days:** " .. sick_days .. "\n"
 
+  -- Ensure the output directory exists
+  local output_dir = vim.fs.dirname(output_file_path)
+  vim.fn.mkdir(output_dir, "p")
+
   local f = io.open(output_file_path, "w")
   if not f then
     vim.notify("Could not open output file: " .. output_file_path, vim.log.levels.ERROR)
