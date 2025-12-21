@@ -1,6 +1,7 @@
 ---@class wtc.TimeTable
 local M = {}
 local parsers = require("work-time-calculator.parsers")
+local path = require("work-time-calculator.path")
 
 ---@class DayEntry
 ---@field date string
@@ -91,7 +92,7 @@ end
 local function TimeTable(config)
   ---@type TimeTable
   local time_table = {}
-  local daily_notes = vim.fn.glob(config.daily_notes_dir .. "/*.md", true, true)
+  local daily_notes = path.get_daily_notes(config)
 
   for _, filepath in ipairs(daily_notes) do
     local today, err = DayEntry.new(filepath, config.workday_length)
@@ -227,11 +228,12 @@ M.generate_markdown_table = generate_markdown_table
 
 ---@param config wtc.Config
 local function generate_hours_table(config)
+  local output_file_path = path.get_output_file_path(config)
   local time_table = TimeTable(config)
 
   local markdown_table = generate_markdown_table(time_table)
   local vacation_days, sick_days = count_special_days(time_table)
-  local existing_header = parsers.read_existing_header(config.output_file)
+  local existing_header = parsers.read_existing_header(output_file_path)
   local output_content = ""
 
   if existing_header then
@@ -243,15 +245,15 @@ local function generate_hours_table(config)
   output_content = output_content .. "**Vacation days:** " .. vacation_days .. "\n"
   output_content = output_content .. "**Sick leave days:** " .. sick_days .. "\n"
 
-  local f = io.open(config.output_file, "w")
+  local f = io.open(output_file_path, "w")
   if not f then
-    vim.notify("Could not open output file: " .. config.output_file, vim.log.levels.ERROR)
+    vim.notify("Could not open output file: " .. output_file_path, vim.log.levels.ERROR)
     return
   end
   f:write(output_content)
   f:close()
 
-  vim.notify("Hours table generated at " .. config.output_file, vim.log.levels.INFO)
+  vim.notify("Hours table generated at " .. output_file_path, vim.log.levels.INFO)
 end
 
 M.generate_hours_table = generate_hours_table
