@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+# Remove this script's directory from PATH and call luarocks
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PATH="${PATH//$script_dir/}" luarocks --project-tree "$LUAROCKS_TREE" "$@"

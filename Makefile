@@ -1,8 +1,9 @@
-TESTS_INIT=tests/minimal_init.lua
+TESTS_INIT=tests/plenary_testrc.lua
 TESTS_DIR=tests/
 
 .PHONY: test
 
+# NOTE: deprecated: use `mise test` (or `mise test:plenary`) instead
 test:
 	@nvim \
 		--headless \

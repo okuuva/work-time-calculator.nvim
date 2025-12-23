@@ -1,0 +1,28 @@
+#:schema https://mise.jdx.dev/schema/mise-task.json
+
+[install]
+sources = ["*.rockspec"]
+outputs = ["{{env.LUAROCKS_TREE}}/lib/luarocks/**/*"]
+run = "luarocks test --prepare"
+
+["test:busted"]
+alias = "test"
+depends = ["install"]
+run = "busted" # using plain busted since it's much faster than luarocks test
+
+["test:plenary"]
+env = { PLENARY_DIR = "{{env.LUAROCKS_TREE}}/lib/plenary.nvim" }
+run = """
+  nvim --headless \
+       --noplugin \
+       -u tests/plenary_testrc.lua \
+       -c 'PlenaryBustedDirectory tests/'
+"""
+
+["test:all"]
+depends = ["test:busted", "test:plenary"]
+
+[clean]
+run = """
+  rm -rf {{env.LUAROCKS_TREE}}
+"""

@@ -1,0 +1,23 @@
+[tools]
+luajit = "latest"
+
+[env]
+LUAROCKS_CONFIG = "{{config_root}}/.luarocks/config-5.1.lua"
+LUAROCKS_TREE = "{{config_root}}/lua_modules"
+LUA_PATH = "./lua/?.lua;./lua/?/init.lua;{{env.LUAROCKS_TREE}}/share/lua/5.1/?.lua;{{env.LUAROCKS_TREE}}/share/lua/5.1/?/init.lua;"
+LUA_CPATH = "{{env.LUAROCKS_TREE}}/lib/lua/5.1/?.so;"
+_.path = [
+    ".mise/tasks",
+    "{{env.LUAROCKS_TREE}}/bin"
+]
+
+[task_config]
+includes = [
+  # Put simple and misc tasks to .mise/tasks.toml,
+  # more complex ones in the .mise/tasks/ directory,
+  # and the related tasks to their own subdirectories under .mise/tasks/
+  # see https://mise.jdx.dev/tasks/file-tasks.html
+  # and https://mise.jdx.dev/tasks/task-configuration.html#task-config-options
+  ".mise/tasks/",
+  ".mise/tasks.toml",
+]
