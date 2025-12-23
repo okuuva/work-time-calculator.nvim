@@ -1,0 +1,12 @@
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.lua]
+indent_style = space
+indent_size = 2
+# this needs to be set here as well so that textwidth is set correctly
+# I wish stylua would let .editorconfig to override stylua.toml oh well.
+max_line_length = 120
