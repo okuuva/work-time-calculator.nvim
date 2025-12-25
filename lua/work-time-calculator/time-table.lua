@@ -239,6 +239,13 @@ local function generate_hours_table(config)
 
   if existing_header then
     output_content = existing_header
+  else
+    output_content = output_content .. "---" .. "\n"
+    output_content = output_content .. "id: " .. vim.fs.basename(output_file_path) .. "\n"
+    output_content = output_content .. "aliases: []" .. "\n"
+    output_content = output_content .. "tags:" .. "\n"
+    output_content = output_content .. "  - time-tracking" .. "\n"
+    output_content = output_content .. "---" .. "\n"
   end
 
   output_content = output_content .. "# Hours\n\n" .. markdown_table
