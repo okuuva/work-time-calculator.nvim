@@ -4,6 +4,7 @@ local M = {}
 local strptime = require("work-time-calculator.strptime")
 
 ---Returns the last n path components of a path
+---@private
 ---@param path string
 ---@param n integer
 ---@param sep string? Path separator, defaults to platform-specific separator
@@ -25,6 +26,7 @@ function M.last_n_path_components(path, n, sep)
   return table.concat(slice, sep)
 end
 
+---@private
 ---@param config wtc.Config
 ---@param timestamp Timestamp?
 ---@return string
@@ -67,6 +69,7 @@ function M.get_output_file_path(config)
 end
 
 ---Get the timestamp from a file path by matching the date format against the path suffix
+---@private
 ---@param date_format string The date format pattern (may include subdirectories like "%Y/%m/%Y-%m-%d")
 ---@param filepath string The file path to parse
 ---@return integer? timestamp The parsed timestamp, or nil if the path doesn't match the format
@@ -100,6 +103,7 @@ function M.get_timestamp_from_filepath(date_format, filepath)
 end
 
 ---Get the timestamp from the current buffer if it's a daily note, or nil otherwise
+---@private
 ---@param config wtc.Config
 ---@return integer? timestamp The parsed timestamp, or nil if the buffer is not a daily note
 function M.get_timestamp_from_current_buffer(config)

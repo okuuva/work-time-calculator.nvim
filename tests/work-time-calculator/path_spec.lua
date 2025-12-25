@@ -1,3 +1,4 @@
+---@diagnostic disable: invisible
 local path = require("work-time-calculator.path")
 
 describe("path", function()
