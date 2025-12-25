@@ -3,6 +3,28 @@ local M = {}
 
 local strptime = require("work-time-calculator.strptime")
 
+---Returns the last n path components of a path
+---@param path string
+---@param n integer
+---@param sep string? Path separator, defaults to platform-specific separator
+function M.last_n_path_components(path, n, sep)
+  sep = sep or package.config:sub(1, 1)
+  local parts = vim.split(path, sep, { plain = true, trimempty = true })
+
+  local len = #parts
+  if n >= len then
+    return table.concat(parts, sep)
+  end
+
+  -- slice from the end
+  local slice = {}
+  for i = len - n + 1, len do
+    slice[#slice + 1] = parts[i]
+  end
+
+  return table.concat(slice, sep)
+end
+
 ---@param config wtc.Config
 ---@param timestamp Timestamp?
 ---@return string
