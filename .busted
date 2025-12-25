@@ -7,5 +7,11 @@ return {
   },
   default = {
     verbose = true,
+    ["exclude-tags"] = "benchmark",
+  },
+  benchmark = {
+    verbose = true,
+    tags = "benchmark",
+    output = "utfTerminal",
   },
 }
