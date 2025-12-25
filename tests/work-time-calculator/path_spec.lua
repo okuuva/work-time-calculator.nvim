@@ -2,6 +2,62 @@ local path = require("work-time-calculator.path")
 
 describe("path", function()
 
+  describe("last_n_path_components", function()
+    it("returns last component when n=1", function()
+      assert.are.same("file.md", path.last_n_path_components("/home/user/notes/file.md", 1, "/"))
+    end)
+
+    it("returns last 2 components when n=2", function()
+      assert.are.same("notes/file.md", path.last_n_path_components("/home/user/notes/file.md", 2, "/"))
+    end)
+
+    it("returns last 3 components when n=3", function()
+      assert.are.same("user/notes/file.md", path.last_n_path_components("/home/user/notes/file.md", 3, "/"))
+    end)
+
+    it("returns entire path when n equals number of components", function()
+      assert.are.same("home/user/notes/file.md", path.last_n_path_components("/home/user/notes/file.md", 4, "/"))
+    end)
+
+    it("returns entire path when n exceeds number of components", function()
+      assert.are.same("home/user/notes/file.md", path.last_n_path_components("/home/user/notes/file.md", 10, "/"))
+    end)
+
+    it("handles path without leading slash", function()
+      assert.are.same("notes/file.md", path.last_n_path_components("home/user/notes/file.md", 2, "/"))
+    end)
+
+    it("handles single component path", function()
+      assert.are.same("file.md", path.last_n_path_components("file.md", 1, "/"))
+    end)
+
+    it("handles single component path with n > 1", function()
+      assert.are.same("file.md", path.last_n_path_components("file.md", 5, "/"))
+    end)
+
+    it("handles path with trailing slash", function()
+      assert.are.same("notes/file", path.last_n_path_components("/home/user/notes/file/", 2, "/"))
+    end)
+
+    it("handles n=0 returning empty string", function()
+      assert.are.same("", path.last_n_path_components("/home/user/notes/file.md", 0, "/"))
+    end)
+
+    it("uses forward slash as default separator on unix-like systems", function()
+      -- This test assumes the default separator works correctly
+      local result = path.last_n_path_components("/home/user/file.md", 1)
+      assert.are.same("file.md", result)
+    end)
+
+    it("works with custom separator", function()
+      assert.are.same("notes\\file.md", path.last_n_path_components("C:\\Users\\notes\\file.md", 2, "\\"))
+    end)
+
+    it("handles empty path", function()
+      assert.are.same("", path.last_n_path_components("", 1, "/"))
+    end)
+  end)
+
   describe("get_daily_note_base_dir", function()
     it("returns daily_notes_dir for simple date format", function()
       local config = { daily_notes_dir = "/notes", date_format = "%Y-%m-%d" }
