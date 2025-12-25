@@ -67,7 +67,6 @@ describe("path", function()
 
     it("returns matching files with subdirectory date format", function()
       local config = { daily_notes_dir = temp_dir, date_format = "%Y/%m/%Y-%m-%d" }
-      local timestamp = os.time({ year = 2024, month = 6, day = 15 })
 
       -- Create subdirectory structure
       local subdir = vim.fs.joinpath(temp_dir, "2024", "06")
@@ -80,7 +79,15 @@ describe("path", function()
       vim.fn.writefile({}, file1)
       vim.fn.writefile({}, file2)
 
-      local result = path.get_daily_notes(config, timestamp)
+      -- Mock current buffer to return a file in June 2024
+      local original_nvim_buf_get_name = vim.api.nvim_buf_get_name
+      vim.api.nvim_buf_get_name = function()
+        return file2
+      end
+
+      local result = path.get_daily_notes(config)
+
+      vim.api.nvim_buf_get_name = original_nvim_buf_get_name
 
       assert.are.same(2, #result)
       assert.is_truthy(vim.tbl_contains(result, file1))
@@ -89,7 +96,6 @@ describe("path", function()
 
     it("does not return files from other directories", function()
       local config = { daily_notes_dir = temp_dir, date_format = "%Y/%m/%Y-%m-%d" }
-      local timestamp = os.time({ year = 2024, month = 6, day = 15 })
 
       -- Create subdirectory structure for June
       local june_dir = vim.fs.joinpath(temp_dir, "2024", "06")
@@ -106,7 +112,15 @@ describe("path", function()
       vim.fn.writefile({}, june_file)
       vim.fn.writefile({}, july_file)
 
-      local result = path.get_daily_notes(config, timestamp)
+      -- Mock current buffer to return a file in June 2024
+      local original_nvim_buf_get_name = vim.api.nvim_buf_get_name
+      vim.api.nvim_buf_get_name = function()
+        return june_file
+      end
+
+      local result = path.get_daily_notes(config)
+
+      vim.api.nvim_buf_get_name = original_nvim_buf_get_name
 
       -- Should only find June files
       assert.are.same(1, #result)
@@ -138,8 +152,18 @@ describe("path", function()
 
     it("returns output file in subdirectory for date format with subdirs", function()
       local config = { daily_notes_dir = "/notes", date_format = "%Y/%m/%Y-%m-%d", output_file = "hours.md" }
-      local timestamp = os.time({ year = 2024, month = 6, day = 15 })
-      assert.are.same("/notes/2024/06/hours.md", path.get_output_file_path(config, timestamp))
+
+      -- Mock current buffer to return a file in June 2024
+      local original_nvim_buf_get_name = vim.api.nvim_buf_get_name
+      vim.api.nvim_buf_get_name = function()
+        return "/notes/2024/06/2024-06-15.md"
+      end
+
+      local result = path.get_output_file_path(config)
+
+      vim.api.nvim_buf_get_name = original_nvim_buf_get_name
+
+      assert.are.same("/notes/2024/06/hours.md", result)
     end)
 
     it("uses default output file name when provided", function()
@@ -160,26 +184,66 @@ describe("path", function()
 
     it("supports strftime formatting in output file name with year-month", function()
       local config = { daily_notes_dir = "/notes", date_format = "%Y-%m-%d", output_file = "hours-%Y-%m.md" }
-      local timestamp = os.time({ year = 2024, month = 6, day = 15 })
-      assert.are.same("/notes/hours-2024-06.md", path.get_output_file_path(config, timestamp))
+
+      -- Mock current buffer to return a file in June 2024
+      local original_nvim_buf_get_name = vim.api.nvim_buf_get_name
+      vim.api.nvim_buf_get_name = function()
+        return "/notes/2024-06-15.md"
+      end
+
+      local result = path.get_output_file_path(config)
+
+      vim.api.nvim_buf_get_name = original_nvim_buf_get_name
+
+      assert.are.same("/notes/hours-2024-06.md", result)
     end)
 
     it("supports strftime formatting in output file name with full date", function()
       local config = { daily_notes_dir = "/notes", date_format = "%Y-%m-%d", output_file = "time-tracking-%Y-%m-%d.md" }
-      local timestamp = os.time({ year = 2024, month = 12, day = 25 })
-      assert.are.same("/notes/time-tracking-2024-12-25.md", path.get_output_file_path(config, timestamp))
+
+      -- Mock current buffer to return a file on Dec 25, 2024
+      local original_nvim_buf_get_name = vim.api.nvim_buf_get_name
+      vim.api.nvim_buf_get_name = function()
+        return "/notes/2024-12-25.md"
+      end
+
+      local result = path.get_output_file_path(config)
+
+      vim.api.nvim_buf_get_name = original_nvim_buf_get_name
+
+      assert.are.same("/notes/time-tracking-2024-12-25.md", result)
     end)
 
     it("supports strftime formatting with subdirectory date format", function()
       local config = { daily_notes_dir = "/notes", date_format = "%Y/%m/%Y-%m-%d", output_file = "hours-%Y-%m.md" }
-      local timestamp = os.time({ year = 2024, month = 6, day = 15 })
-      assert.are.same("/notes/2024/06/hours-2024-06.md", path.get_output_file_path(config, timestamp))
+
+      -- Mock current buffer to return a file in June 2024
+      local original_nvim_buf_get_name = vim.api.nvim_buf_get_name
+      vim.api.nvim_buf_get_name = function()
+        return "/notes/2024/06/2024-06-15.md"
+      end
+
+      local result = path.get_output_file_path(config)
+
+      vim.api.nvim_buf_get_name = original_nvim_buf_get_name
+
+      assert.are.same("/notes/2024/06/hours-2024-06.md", result)
     end)
 
     it("handles output file with only strftime specifiers", function()
       local config = { daily_notes_dir = "/notes", date_format = "%Y-%m-%d", output_file = "%Y-%m-hours.md" }
-      local timestamp = os.time({ year = 2023, month = 3, day = 10 })
-      assert.are.same("/notes/2023-03-hours.md", path.get_output_file_path(config, timestamp))
+
+      -- Mock current buffer to return a file in March 2023
+      local original_nvim_buf_get_name = vim.api.nvim_buf_get_name
+      vim.api.nvim_buf_get_name = function()
+        return "/notes/2023-03-10.md"
+      end
+
+      local result = path.get_output_file_path(config)
+
+      vim.api.nvim_buf_get_name = original_nvim_buf_get_name
+
+      assert.are.same("/notes/2023-03-hours.md", result)
     end)
   end)
 
@@ -250,4 +314,3 @@ describe("path", function()
     end)
   end)
 end)
-

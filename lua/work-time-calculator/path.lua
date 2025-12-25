@@ -16,7 +16,8 @@ end
 ---Returns all daily note files in the base directory that match the date pattern
 ---@param config wtc.Config
 ---@return string[]
-function M.get_daily_notes(config, timestamp)
+function M.get_daily_notes(config)
+  local timestamp = M.get_timestamp_from_current_buffer(config)
   local base_dir = M.get_daily_note_base_dir(config, timestamp)
   local filename_format = vim.fs.basename(config.date_format)
 
@@ -35,9 +36,9 @@ end
 
 ---Returns the full path to the output file (output_file joined with daily note base dir)
 ---@param config wtc.Config
----@param timestamp Timestamp?
 ---@return string
-function M.get_output_file_path(config, timestamp)
+function M.get_output_file_path(config)
+  local timestamp = M.get_timestamp_from_current_buffer(config)
   local base_dir = M.get_daily_note_base_dir(config, timestamp)
   local parsed_output_file = os.date(config.output_file, timestamp) --[[@as string]]
   return vim.fs.joinpath(base_dir, parsed_output_file)
