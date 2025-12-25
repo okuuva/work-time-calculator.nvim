@@ -108,7 +108,33 @@ end
 ---@return integer? timestamp The parsed timestamp, or nil if the buffer is not a daily note
 function M.get_timestamp_from_current_buffer(config)
   local bufpath = vim.api.nvim_buf_get_name(0)
+  if not M.is_daily_note_path(config, bufpath) then
+    return nil
+  end
   return M.get_timestamp_from_filepath(config.date_format, bufpath)
+end
+
+---Check if the given path might be a daily note by checking if it begins with daily_notes_dir
+---@private
+---@param config wtc.Config
+---@param filepath string The file path to check
+---@return boolean
+function M.is_daily_note_path(config, filepath)
+  local daily_notes_dir = config.daily_notes_dir
+  if not daily_notes_dir or daily_notes_dir == "" then
+    return false
+  end
+
+  -- Normalize both paths for consistent comparison
+  local normalized_filepath = vim.fs.normalize(filepath)
+  local normalized_daily_notes_dir = vim.fs.normalize(daily_notes_dir)
+
+  -- Ensure daily_notes_dir ends with separator for proper prefix matching
+  if not vim.endswith(normalized_daily_notes_dir, "/") then
+    normalized_daily_notes_dir = normalized_daily_notes_dir .. "/"
+  end
+
+  return vim.startswith(normalized_filepath, normalized_daily_notes_dir)
 end
 
 return M

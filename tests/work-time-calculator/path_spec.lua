@@ -357,4 +357,52 @@ describe("path", function()
       assert.is_nil(path.get_timestamp_from_filepath("%Y/%m/%Y-%m-%d", filepath))
     end)
   end)
+
+  describe("is_daily_note_path", function()
+    it("returns true when path starts with daily_notes_dir", function()
+      local config = { daily_notes_dir = "/home/user/notes" }
+      assert.is_true(path.is_daily_note_path(config, "/home/user/notes/2024-01-01.md"))
+    end)
+
+    it("returns true for nested path within daily_notes_dir", function()
+      local config = { daily_notes_dir = "/home/user/notes" }
+      assert.is_true(path.is_daily_note_path(config, "/home/user/notes/2024/06/2024-06-15.md"))
+    end)
+
+    it("returns false when path does not start with daily_notes_dir", function()
+      local config = { daily_notes_dir = "/home/user/notes" }
+      assert.is_false(path.is_daily_note_path(config, "/home/user/other/2024-01-01.md"))
+    end)
+
+    it("returns false when daily_notes_dir is nil", function()
+      local config = { daily_notes_dir = nil }
+      assert.is_false(path.is_daily_note_path(config, "/home/user/notes/2024-01-01.md"))
+    end)
+
+    it("returns false when daily_notes_dir is empty string", function()
+      local config = { daily_notes_dir = "" }
+      assert.is_false(path.is_daily_note_path(config, "/home/user/notes/2024-01-01.md"))
+    end)
+
+    it("returns false for path that is a prefix of daily_notes_dir", function()
+      local config = { daily_notes_dir = "/home/user/notes/daily" }
+      assert.is_false(path.is_daily_note_path(config, "/home/user/notes/2024-01-01.md"))
+    end)
+
+    it("handles paths with trailing slashes", function()
+      local config = { daily_notes_dir = "/home/user/notes/" }
+      assert.is_true(path.is_daily_note_path(config, "/home/user/notes/2024-01-01.md"))
+    end)
+
+    it("handles unnormalized paths", function()
+      local config = { daily_notes_dir = "/home/user/notes" }
+      assert.is_true(path.is_daily_note_path(config, "/home/user/notes/../notes/2024-01-01.md"))
+    end)
+
+    it("returns false for similar but different directory names", function()
+      local config = { daily_notes_dir = "/home/user/notes" }
+      -- Path starts with "notes-archive" not "notes"
+      assert.is_false(path.is_daily_note_path(config, "/home/user/notes-archive/2024-01-01.md"))
+    end)
+  end)
 end)
