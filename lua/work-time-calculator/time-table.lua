@@ -136,8 +136,10 @@ end
 local function most_entries(time_table)
   local max = 0
   for _, entry in ipairs(time_table) do
-    if #entry.times > max then
-      max = #entry.times
+    -- Round up to the next even number to account for odd times
+    local times_count = math.ceil(#entry.times / 2) * 2
+    if times_count > max then
+      max = times_count
     end
   end
   return max
@@ -205,11 +207,16 @@ local function generate_markdown_table(time_table)
     local row = string.format("| %s | %s | %s ", entry.date, entry.weekday, entry.day_type)
 
     -- Add time entries, only if they exist
-    for i = 1, math.floor(#entry.times / 2) do -- Iterate up to the number of pairs
-      row = row .. string.format("| %s | %s ", entry.times[2 * i - 1], entry.times[2 * i])
+    -- Round up to include odd times (with empty pair partner)
+    local num_pairs = math.ceil(#entry.times / 2)
+    for i = 1, num_pairs do
+      local in_time = entry.times[2 * i - 1] or "  "
+      local out_time = entry.times[2 * i] or "  "
+      row = row .. string.format("| %s | %s ", in_time, out_time)
     end
 
-    row = padRow(row, #entry.times, most_records)
+    -- Use rounded-up count for padding calculation
+    row = padRow(row, num_pairs * 2, most_records)
 
     row = row
       .. string.format(
