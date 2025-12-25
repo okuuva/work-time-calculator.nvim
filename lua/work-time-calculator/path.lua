@@ -66,35 +66,30 @@ function M.get_output_file_path(config)
   return vim.fs.joinpath(base_dir, parsed_output_file)
 end
 
----Get the timestamp from a file path if it's a daily note, or nil otherwise
----Checks that the path is within the daily_notes_dir and matches the date_format
----@param config wtc.Config
----@param filepath string The file path to check
----@return integer? timestamp The parsed timestamp, or nil if the path is not a daily note
-function M.get_timestamp_from_filepath(config, filepath)
-  local daily_notes_dir = config.daily_notes_dir
-  if not daily_notes_dir then
-    return nil
-  end
-
-  -- Normalize paths (ensure trailing slash for directory comparison)
-  daily_notes_dir = vim.fs.normalize(daily_notes_dir)
+---Get the timestamp from a file path by matching the date format against the path suffix
+---@param date_format string The date format pattern (may include subdirectories like "%Y/%m/%Y-%m-%d")
+---@param filepath string The file path to parse
+---@return integer? timestamp The parsed timestamp, or nil if the path doesn't match the format
+function M.get_timestamp_from_filepath(date_format, filepath)
   filepath = vim.fs.normalize(filepath)
 
-  -- Check if filepath is within the daily_notes_dir
-  if not vim.startswith(filepath, daily_notes_dir .. "/") then
+  -- Remove .md extension
+  local path_without_ext = filepath:match("^(.+)%.md$")
+  if not path_without_ext then
     return nil
   end
 
-  -- Get the relative path from daily_notes_dir (without the .md extension)
-  local relative_path = filepath:sub(#daily_notes_dir + 2) -- +2 to skip the trailing slash
-  local relative_path_without_ext = relative_path:match("^(.+)%.md$")
-  if not relative_path_without_ext then
-    return nil
+  -- Count how many path components are in the date_format
+  -- e.g., "%Y/%m/%Y-%m-%d" has 3 components (split by /)
+  local format_depth = 1
+  for _ in date_format:gmatch("/") do
+    format_depth = format_depth + 1
   end
 
-  -- Try to parse using the full date_format (which may include subdirectories)
-  local parsed_ts = strptime.parse(relative_path_without_ext, config.date_format)
+  local date_string = M.last_n_path_components(path_without_ext, format_depth)
+
+  -- Try to parse using the date_format
+  local parsed_ts = strptime.parse(date_string, date_format)
   if not parsed_ts then
     return nil
   end
@@ -109,7 +104,7 @@ end
 ---@return integer? timestamp The parsed timestamp, or nil if the buffer is not a daily note
 function M.get_timestamp_from_current_buffer(config)
   local bufpath = vim.api.nvim_buf_get_name(0)
-  return M.get_timestamp_from_filepath(config, bufpath)
+  return M.get_timestamp_from_filepath(config.date_format, bufpath)
 end
 
 return M
