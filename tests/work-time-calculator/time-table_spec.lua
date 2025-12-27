@@ -64,7 +64,7 @@ describe("generate_markdown_table", function()
         total_hours = 0,
         target_hours = 0,
         hours_diff = 0,
-      }
+      },
     }
     local markdown = tt.generate_markdown_table(time_table)
     local expected_markdown = [[
@@ -87,7 +87,7 @@ describe("generate_markdown_table", function()
         total_hours = 4 * 60, -- Only one pair added
         target_hours = 8 * 60,
         hours_diff = -4 * 60,
-      }
+      },
     }
     local markdown = tt.generate_markdown_table(time_table)
     local expected_markdown = [[
@@ -110,7 +110,7 @@ describe("generate_markdown_table", function()
         total_hours = 3 * 60,
         target_hours = 8 * 60,
         hours_diff = -5 * 60,
-      }
+      },
     }
     local markdown = tt.generate_markdown_table(time_table)
     local expected_markdown = [[
@@ -151,7 +151,7 @@ describe("generate_markdown_table", function()
         total_hours = 8 * 60,
         target_hours = 8 * 60,
         hours_diff = 0,
-      }
+      },
     }
     local markdown = tt.generate_markdown_table(time_table)
     local expected_markdown = [[
@@ -176,7 +176,7 @@ describe("generate_markdown_table", function()
         total_hours = 0,
         target_hours = 8 * 60,
         hours_diff = -8 * 60,
-      }
+      },
     }
     local markdown = tt.generate_markdown_table(time_table)
     local expected_markdown = [[
@@ -199,7 +199,7 @@ describe("generate_markdown_table", function()
         total_hours = 5 * 60,
         target_hours = 8 * 60,
         hours_diff = -3 * 60,
-      }
+      },
     }
     local markdown = tt.generate_markdown_table(time_table)
     local expected_markdown = [[
@@ -240,7 +240,7 @@ describe("generate_markdown_table", function()
         total_hours = 3 * 60,
         target_hours = 8 * 60,
         hours_diff = -5 * 60,
-      }
+      },
     }
     local markdown = tt.generate_markdown_table(time_table)
     local expected_markdown = [[

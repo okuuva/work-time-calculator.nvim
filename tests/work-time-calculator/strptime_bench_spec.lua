@@ -57,7 +57,7 @@ local function format_results(name, stats)
   )
 end
 
-describe("strptime benchmarks #benchmark", function()
+describe("benchmarks #benchmark", function()
   local ITERATIONS = 10000
 
   describe("parse", function()
@@ -147,4 +147,3 @@ describe("strptime benchmarks #benchmark", function()
     end)
   end)
 end)
-
