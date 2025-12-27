@@ -57,7 +57,7 @@ local function format_results(name, stats)
   )
 end
 
-describe("benchmarks #benchmark", function()
+describe("#benchmark", function()
   local ITERATIONS = 10000
 
   describe("parse", function()
