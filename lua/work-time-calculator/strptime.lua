@@ -11,7 +11,7 @@ function M.parse(str, format)
     return nil
   end
   local timestamp = vim.fn.strptime(format, str)
-  if timestamp == 0 then
+  if timestamp == 0 and not str:find("1970") then
     return nil
   end
   -- vim.fn.strptime allows partial matches (e.g., "2024-06-15-extra" matches "%Y-%m-%d")
